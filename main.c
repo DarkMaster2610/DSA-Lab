@@ -1,61 +1,100 @@
 #include <stdio.h>
+#include <ctype.h> //
+#include <string.h>
 #define MAX 100
-
 typedef struct {
-    int arr[MAX];
-    int top;
-} stack;
-
-void init(stack *s) {
-    s->top = -1;
+ char arr[MAX];
+ int top;
+} Stack;
+void init(Stack *s) {
+ s->top = -1;
+}
+int isEmpty(Stack *s) {
+ return s->top == -1;
+}
+int isFull(Stack *s) {
+ return s->top == MAX - 1;
+}
+void push(Stack *s, char c) {
+ if (!isFull(s)) {
+ s->arr[++(s->top)] = c;
+ }
+}
+char pop(Stack *s) {
+ if (!isEmpty(s)) {
+ return s->arr[(s->top)--];
+ }
+ return '\0';
+}
+char peek(Stack *s) {
+ if (!isEmpty(s)) {
+ return s->arr[s->top];
+ }
+ return '\0';
 }
 
-int isempty(stack *s) {
-    return s->top == -1;
+int precedence(char op) {
+ switch (op) {
+ case '+':
+ case '-': return 1;
+ case '*':
+ case '/': return 2;
+ case '^': return 3;
+ }
+ return 0;
 }
 
-int isfull(stack *s) {
-    return s->top == MAX - 1;
+int isOperator(char c) {
+ return c == '+' || c == '-' || c == '*' || c == '/' || c == '^';
 }
+void infixToPostfix(char* infix, char* postfix) {
+ Stack s;
+ init(&s);
+ int k = 0;
+ for (int i = 0; infix[i] != '\0'; i++) {
+ char c = infix[i];
 
-void push(stack *s, int value) {
-    if (isfull(s)) {
-        printf("Stack Overflow! Cannot push %d\n", value);
-        return;
-    }
-    s->arr[++(s->top)] = value;
-    printf("Pushed %d\n", value);
+ if (isalnum(c)) {
+ postfix[k++] = c;
+ }
+
+ else if (c == '(') {
+ push(&s, c);
+ }
+
+ else if (c == ')') {
+ while (!isEmpty(&s) && peek(&s) != '(') {
+ postfix[k++] = pop(&s);
+ }
+ pop(&s);
+ }
+
+ else if (isOperator(c)) {
+ while (!isEmpty(&s) && precedence(peek(&s)) >= precedence(c)) {
+ if (c == '^' && peek(&s) == '^') {
+
+
+ break;
+ } else {
+ postfix[k++] = pop(&s);
+ }
+ }
+ push(&s, c);
+ }
+ }
+
+ while (!isEmpty(&s)) {
+ postfix[k++] = pop(&s);
+ }
+ postfix[k] = '\0';
 }
-
-int pop(stack *s) {
-    if (isempty(s)) {
-        printf("Stack Underflow! Cannot pop\n");
-        return -1;
-    }
-    return s->arr[(s->top)--];
-}
-
-int peek(stack *s) {
-    if (isempty(s)) {
-        printf("Stack is empty\n");
-        return -1;
-    }
-    return s->arr[s->top];
-}
-
 int main() {
-    stack s;
-    init(&s);
-    push(&s, 10);
-    push(&s, 20);
-    push(&s, 30);
-    printf("Top element is %d\n", peek(&s));
-    printf("Popped element is %d\n", pop(&s));
-    printf("Popped element is %d\n", pop(&s));
-    if (isempty(&s)) {
-        printf("Stack is empty now\n");
-    } else {
-        printf("Stack is not empty\n");
-    }
-    return 0;
+ char infix[MAX];
+ char postfix[MAX];
+ printf("Enter infix expression: ");
+ fgets(infix, MAX, stdin);
+ infix[strcspn(infix, "\n")] = '\0';
+ infixToPostfix(infix, postfix);
+ printf("Postfix expression: %s\n", postfix);
+ return 0;
 }
