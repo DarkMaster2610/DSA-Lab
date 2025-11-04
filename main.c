@@ -1,34 +1,26 @@
 #include <stdio.h>
-void heapify(int arr[], int n, int i) {
-    int largest = i;   // Initialize largest as root
-    int left = 2 * i + 1;
-    int right = 2 * i + 2;
-    int temp;
-    if (left < n && arr[left] > arr[largest])
-        largest = left;
-    if (right < n && arr[right] > arr[largest])
-        largest = right;
-    if (largest != i) {
-        temp = arr[i];
-        arr[i] = arr[largest];
-        arr[largest] = temp;
-
-        heapify(arr, n, largest);
-    }
+void swap(int* a, int* b) {
+    int t = *a;
+    *a = *b;
+    *b = t;
 }
-void heapSort(int arr[], int n) {
-    int temp;
-    // Build max heap
-    for (int i = n / 2 - 1; i >= 0; i--)
-        heapify(arr, n, i);
-    // Extract elements from heap one by one
-    for (int i = n - 1; i > 0; i--) {
-        // Move current root to end
-        temp = arr[0];
-        arr[0] = arr[i];
-        arr[i] = temp;
-        // Call max heapify on the reduced heap
-        heapify(arr, i, 0);
+int partition(int arr[], int low, int high) {
+    int pivot = arr[high]; // pivot
+    int i = low - 1;  // Index of smaller element
+    for (int j = low; j <= high - 1; j++) {
+        if (arr[j] < pivot) {
+            i++;
+            swap(&arr[i], &arr[j]);
+        }
+    }
+    swap(&arr[i + 1], &arr[high]);
+    return i + 1;
+}
+void quickSort(int arr[], int low, int high) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
     }
 }
 void printArray(int arr[], int n) {
@@ -37,13 +29,12 @@ void printArray(int arr[], int n) {
     printf("\n");
 }
 int main() {
-    int arr[] = {12, 11, 13, 5, 6, 7};
+    int arr[] = {10, 7, 8, 9, 1, 5};
     int n = sizeof(arr)/sizeof(arr[0]);
-
     printf("Original array: ");
     printArray(arr, n);
-    heapSort(arr, n);
-    printf("Sorted array (Heap Sort): ");
+    quickSort(arr, 0, n - 1);
+    printf("Sorted array (Quick Sort): ");
     printArray(arr, n);
     return 0;
 }
